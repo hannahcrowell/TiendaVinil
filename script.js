@@ -883,7 +883,7 @@ async function openProduct(idOrObj) {
       "reseñas",
       `?producto_id=eq.${
         p.supabaseId || p.id
-      }&aprobada=eq.true&order=created_at.desc`
+      }&order=created_at.desc`
     );
     if (reviews.length) p.reviews = reviews;
   } catch (e) {
@@ -1266,16 +1266,20 @@ async function submitReview() {
         "reseñas",
         {
           producto_id: currentProduct.supabaseId,
+          usuario_id: currentUser.supabaseId || null,
           nombre: name,
           estrellas: reviewStarSel,
           texto: text,
+          aprobada: true,
+          compra_verificada: true,
         },
         authToken
       );
     } catch (e) {
+      console.error("Error al guardar reseña en Supabase:", e.message);
       const msg = e.message.includes("Solo puedes")
         ? "Solo puedes reseñar discos que hayas comprado"
-        : "Error al publicar la reseña";
+        : `Error al publicar la reseña: ${e.message}`;
       showToast("⚠️", msg);
       return;
     }
