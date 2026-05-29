@@ -976,7 +976,8 @@ async function openProduct(idOrObj) {
   // Tracklist
   buildTracklist(p.tracks || []);
 
-  // Reseñas
+  // Reseñas — cargar pedidos frescos antes de evaluar si el usuario compró el producto
+  await loadUserOrders();
   renderReviews(p.reviews || []);
   renderReviewForm();
 
@@ -1938,6 +1939,48 @@ function isAdmin() {
   return currentUser && (currentUser.email === "mfhm1316@gmail.com" || currentUser.email === "mfhm1316@gmial.com");
 }
 
+/* Carga (o recarga) los pedidos del usuario desde Supabase.
+   Se llama desde loadProfile() Y desde openProduct() para que
+   la página de producto siempre tenga los pedidos actualizados
+   antes de decidir si mostrar el formulario de reseña. */
+async function loadUserOrders() {
+  if (!authToken) return;
+  try {
+    const pedidos = await sb.authGet(
+      "pedidos_con_items",
+      "?order=created_at.desc",
+      authToken
+    );
+    userOrders = Array.isArray(pedidos)
+      ? pedidos.map((p) => ({
+          id: p.numero,
+          supabaseId: p.id,
+          date: new Date(p.created_at).toLocaleDateString("es-MX", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }),
+          name: p.cliente_nombre,
+          email: p.cliente_email,
+          address: [p.envio_calle, p.envio_colonia, p.envio_ciudad]
+            .filter(Boolean)
+            .join(", "),
+          items: Array.isArray(p.items) ? p.items : [],
+          subtotal: parseFloat(p.subtotal),
+          shipping: parseFloat(p.costo_envio),
+          total: parseFloat(p.total),
+          payment: p.metodo_pago,
+          status: p.estado,
+          isOxxo: p.metodo_pago === "OXXO Pay",
+          oxxoRef: p.oxxo_referencia,
+        }))
+      : [];
+    saveOrders();
+  } catch (e) {
+    console.warn("Pedidos no disponibles desde Supabase:", e.message);
+  }
+}
+
 async function loadProfile() {
   if (!currentUser) return;
   document.getElementById("profileName").textContent =
@@ -2004,40 +2047,7 @@ async function loadProfile() {
     }
   }
 
-  if (authToken) {
-    try {
-      const pedidos = await sb.authGet(
-        "pedidos_con_items",
-        "?order=created_at.desc",
-        authToken
-      );
-      userOrders = Array.isArray(pedidos) ? pedidos.map((p) => ({
-        id: p.numero,
-        supabaseId: p.id,
-        date: new Date(p.created_at).toLocaleDateString("es-MX", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }),
-        name: p.cliente_nombre,
-        email: p.cliente_email,
-        address: [p.envio_calle, p.envio_colonia, p.envio_ciudad]
-          .filter(Boolean)
-          .join(", "),
-        items: Array.isArray(p.items) ? p.items : [],
-        subtotal: parseFloat(p.subtotal),
-        shipping: parseFloat(p.costo_envio),
-        total: parseFloat(p.total),
-        payment: p.metodo_pago,
-        status: p.estado,
-        isOxxo: p.metodo_pago === "OXXO Pay",
-        oxxoRef: p.oxxo_referencia,
-      })) : [];
-      saveOrders();
-    } catch (e) {
-      console.warn("Pedidos locales (Supabase no disponible):", e.message);
-    }
-  }
+  await loadUserOrders();
   renderOrdersList();
   renderTicketsList();
 }
