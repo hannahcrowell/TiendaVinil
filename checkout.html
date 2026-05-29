@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Once Upon a Time — Checkout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- ================================================================
+     NAVBAR
+================================================================ -->
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <div class="vinyl-spin"></div>
+        Once Upon a Time
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="tienda.html">Tienda</a></li>
+        <li><a href="envios.html">Envíos</a></li>
+        <li><a href="politicas.html">Políticas</a></li>
+        <li><a href="index.html#contacto">Contacto</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Carrito <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <div id="navAuthArea">
+          <button class="auth-btn" onclick="openAuth('login')">
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================================================================
+     CHECKOUT
+================================================================ -->
+    <div id="page-checkout" class="page active checkout-page">
+      <div class="checkout-body">
+        <!-- Formulario -->
+        <div class="checkout-form-side">
+          <h1
+            style="
+              font-family: var(--font-display);
+              font-size: 2rem;
+              margin-bottom: 1.5rem;
+              color: var(--morado-800);
+            "
+          >
+            Pago y Envío
+          </h1>
+
+          <!-- Paso 1: Envío -->
+          <div class="checkout-step">
+            <h3>
+              <span class="step-num">1</span> Dirección de entrega
+            </h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre(s) *</label
+                ><input type="text" id="ckName" required />
+              </div>
+              <div class="form-group">
+                <label>Apellido(s) *</label
+                ><input type="text" id="ckLast" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Calle y Número *</label
+              ><input
+                type="text"
+                id="ckStreet"
+                placeholder="Ej. Av. Central 123, Int. 4B"
+                required
+              />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Colonia *</label
+                ><input type="text" id="ckColonia" required />
+              </div>
+              <div class="form-group">
+                <label>Código Postal *</label
+                ><input
+                  type="text"
+                  id="ckCP"
+                  placeholder="5 Cifras"
+                  maxlength="5"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Ciudad *</label
+                ><input type="text" id="ckCity" required />
+              </div>
+              <div class="form-group">
+                <label>Estado *</label>
+                <select id="ckState" required>
+                  <option value="">Selecciona tu estado</option>
+                  <option>Aguascalientes</option>
+                  <option>Baja California</option>
+                  <option>Baja California Sur</option>
+                  <option>Campeche</option>
+                  <option>Chiapas</option>
+                  <option>Chihuahua</option>
+                  <option>Coahuila</option>
+                  <option>Colima</option>
+                  <option>Ciudad de México</option>
+                  <option>Durango</option>
+                  <option>Guanajuato</option>
+                  <option>Guerrero</option>
+                  <option>Hidalgo</option>
+                  <option>Jalisco</option>
+                  <option>Estado de México</option>
+                  <option>Michoacán</option>
+                  <option>Morelos</option>
+                  <option>Nayarit</option>
+                  <option>Nuevo León</option>
+                  <option>Oaxaca</option>
+                  <option>Puebla</option>
+                  <option>Querétaro</option>
+                  <option>Quintana Roo</option>
+                  <option>San Luis Potosí</option>
+                  <option>Sinaloa</option>
+                  <option>Sonora</option>
+                  <option>Tabasco</option>
+                  <option>Tamaulipas</option>
+                  <option>Tlaxcala</option>
+                  <option>Veracruz</option>
+                  <option>Yucatán</option>
+                  <option>Zacatecas</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Teléfono *</label
+                ><input
+                  type="tel"
+                  id="ckPhone"
+                  placeholder="10 dígitos"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Correo electrónico *</label
+                ><input
+                  type="email"
+                  id="ckEmail"
+                  placeholder="tu@correo.com"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Paso 2: Método de pago -->
+          <div class="checkout-step">
+            <h3>
+              <span class="step-num">2</span> Método de pago
+            </h3>
+            <div class="payment-methods">
+              <div
+                class="payment-method selected"
+                onclick="selectPayment(this, 'card')"
+              >
+                <span class="pm-icon">💳</span>
+                <strong>Tarjeta</strong>
+              </div>
+              <div
+                class="payment-method"
+                onclick="selectPayment(this, 'oxxo')"
+              >
+                <span class="pm-icon">💵</span>
+                <strong>OXXO</strong>
+              </div>
+              <div
+                class="payment-method"
+                onclick="selectPayment(this, 'transfer')"
+              >
+                <span class="pm-icon">🏦</span>
+                <strong>SPEI</strong>
+              </div>
+            </div>
+
+            <!-- Formularios de pago -->
+            <div class="payment-forms">
+              <!-- Tarjeta -->
+              <div id="cardFields" class="pay-form-content show">
+                <div class="form-group">
+                  <label>Número de Tarjeta</label>
+                  <input
+                    type="text"
+                    id="cardNum"
+                    placeholder="1234 5678 1234 5678"
+                    maxlength="19"
+                  />
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Vencimiento</label>
+                    <input type="text" id="cardExp" placeholder="MM/AA" maxlength="5" />
+                  </div>
+                  <div class="form-group">
+                    <label>CVV</label>
+                    <input type="password" id="cardCvv" placeholder="123" maxlength="4" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Titular de la tarjeta</label>
+                  <input type="text" id="cardName" placeholder="Como aparece en la tarjeta" />
+                </div>
+              </div>
+
+              <!-- OXXO -->
+              <div id="oxxoFields" class="pay-form-content" style="display: none;">
+                <div class="oxxo-instructions">
+                  <p>
+                    Al confirmar tu pedido, generaremos una ficha de pago digital con un
+                    código QR / barras. Podrás pagar en cualquier OXXO del país en efectivo.
+                  </p>
+                  <ul>
+                    <li>Comisión de recepción de OXXO (~$15 MXN) no incluida.</li>
+                    <li>Tienes 48 horas para realizar el pago antes de que expire la ficha.</li>
+                    <li>Tu pedido se procesará al momento de recibir la acreditación del pago.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- SPEI -->
+              <div id="transferFields" class="pay-form-content" style="display: none;">
+                <div class="spei-instructions">
+                  <p>Transferencia SPEI directa:</p>
+                  <div class="spei-field">
+                    <span>Banco:</span> <strong>STP (Sistema de Transferencias y Pagos)</strong>
+                  </div>
+                  <div class="spei-field">
+                    <span>CLABE:</span> <strong>0123 4567 8901 2345 67</strong>
+                  </div>
+                  <div class="spei-field">
+                    <span>Beneficiario:</span> <strong>Once Upon a Time S.A. de C.V.</strong>
+                  </div>
+                  <p style="font-size: 0.78rem; color: var(--texto-suave); margin-top: 0.6rem">
+                    Por favor, usa tu número de pedido (#OUAT-XXXX) como referencia de pago para
+                    acelerar la validación.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn-primary"
+            style="
+              width: 100%;
+              justify-content: center;
+              padding: 1.1rem;
+              font-size: 1rem;
+            "
+            onclick="processOrder()"
+          >
+            Confirmar pedido →
+          </button>
+        </div>
+
+        <div>
+          <div class="order-summary">
+            <h2>Resumen del pedido</h2>
+            <div id="orderItems">
+              <p style="color: var(--texto-suave); font-size: 0.83rem">
+                Tu carrito está vacío.
+              </p>
+            </div>
+            <div class="order-line">
+              <span>Subtotal</span><span id="orderSubtotal">$0.00</span>
+            </div>
+            <div class="order-line">
+              <span>Envío</span><span id="orderShipping">—</span>
+            </div>
+            <div class="order-line total">
+              <span>Total</span><strong id="orderTotal">$0.00</strong>
+            </div>
+            <div class="secure-badge">
+              📦 Envío en 3–7 días hábiles · Todo México
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer style="margin-top: 3rem">
+        <div class="footer-bottom" style="border-top: none; padding-top: 0">
+          <p>© 2026 Once Upon a Time</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ================================================================
+     CARRITO DRAWER
+================================================================ -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCartBg(event)">
+      <div class="cart-drawer">
+        <div class="cart-header">
+          <h2>Tu carrito 🛒</h2>
+          <button class="close-btn" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+          <div class="cart-empty">
+            <span class="empty-icon">🎵</span>
+            <p>Tu carrito está vacío.<br />¡Explora el catálogo!</p>
+          </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none">
+          <div class="cart-total">
+            <span>Total</span><strong id="cartTotal">$0.00</strong>
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center"
+            onclick="goToCheckout()"
+          >
+            Ir a pagar →
+          </button>
+          <button
+            class="btn-secondary"
+            style="width: 100%; text-align: center; margin-top: 0.6rem"
+            onclick="showPage('tienda');toggleCart()"
+          >
+            Seguir comprando
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL AUTH
+================================================================ -->
+    <div class="modal-overlay" id="authModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeAuth()">✕</button>
+        <div class="modal-logo">Once Upon a Time</div>
+        <h2 class="modal-title" id="authTitle">Bienvenida</h2>
+        <p class="modal-sub" id="authSub">
+          Inicia sesión para acceder a tu cuenta
+        </p>
+
+        <button class="google-btn" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
+          </svg>
+          Continuar con Google
+        </button>
+        <div class="divider-or"><span>o</span></div>
+
+        <div id="loginForm">
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="loginEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="loginPass"
+              placeholder="Tu contraseña"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="loginWithEmail()"
+          >
+            Iniciar sesión
+          </button>
+          <div class="auth-switch">
+            ¿No tienes cuenta?
+            <a onclick="switchAuthMode('register')">Regístrate aquí</a>
+          </div>
+        </div>
+
+        <div id="registerForm" style="display: none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre</label
+              ><input type="text" id="regName" placeholder="Nombre" />
+            </div>
+            <div class="form-group">
+              <label>Apellido</label
+              ><input type="text" id="regLast" placeholder="Apellido" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="regEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="regPass"
+              placeholder="Mínimo 8 caracteres"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="registerUser()"
+          >
+            Crear cuenta
+          </button>
+          <div class="auth-switch">
+            ¿Ya tienes cuenta?
+            <a onclick="switchAuthMode('login')">Inicia sesión</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL TICKET
+================================================================ -->
+    <div class="modal-overlay" id="ticketModal">
+      <div class="ticket-modal">
+        <button class="modal-close" onclick="closeTicketModal()">✕</button>
+        <div class="ticket-header">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem">🎵</div>
+          <h2>Once Upon a Time</h2>
+          <p>Comprobante de compra</p>
+          <span class="ticket-id" id="ticketOrderId">#OUAT-000000</span>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Datos del pedido</div>
+          <div class="ticket-row">
+            <span>Fecha</span><strong id="tDate">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Cliente</span><strong id="tName">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Correo</span><strong id="tEmail">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Método de pago</span><strong id="tPayment">—</strong>
+          </div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Productos</div>
+          <div id="tItems"></div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Envío</div>
+          <div class="ticket-row">
+            <span>Dirección</span><strong id="tAddress">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Paquetería</span><strong>Estafeta</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Estado</span><strong id="tStatus">En proceso ⏳</strong>
+          </div>
+        </div>
+        <div class="ticket-total-row">
+          <span>Total pagado</span>
+          <span id="tTotal">$0.00</span>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn-primary" onclick="downloadTicketPDF()">
+            ⬇ Descargar PDF
+          </button>
+          <button class="btn-secondary" onclick="resendTicketEmail()">
+            📧 Reenviar al correo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <span id="toastIcon">✅</span>
+      <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

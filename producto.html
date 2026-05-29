@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Once Upon a Time — Detalle de Vinil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- ================================================================
+     NAVBAR
+================================================================ -->
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <div class="vinyl-spin"></div>
+        Once Upon a Time
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="tienda.html">Tienda</a></li>
+        <li><a href="envios.html">Envíos</a></li>
+        <li><a href="politicas.html">Políticas</a></li>
+        <li><a href="index.html#contacto">Contacto</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Carrito <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <div id="navAuthArea">
+          <button class="auth-btn" onclick="openAuth('login')">
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================================================================
+     DETALLE DE PRODUCTO
+================================================================ -->
+    <div id="page-product" class="page active product-detail-page">
+      <div class="pd-breadcrumb">
+        <a onclick="showPage('home')">Inicio</a> ›
+        <a onclick="showPage('tienda')">Tienda</a> ›
+        <span id="pdBreadcrumb">Producto</span>
+      </div>
+      <div class="pd-body">
+        <!-- Galería -->
+        <div class="pd-gallery">
+          <div class="pd-main-img" id="pdMainImg">
+            <div class="pd-main-vinyl"></div>
+          </div>
+          <div class="pd-thumbs" id="pdThumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="pd-info">
+          <div class="pd-genre" id="pdGenre"></div>
+          <h1 class="pd-title" id="pdTitle"></h1>
+          <div class="pd-artist" id="pdArtist"></div>
+          <div class="pd-rating">
+            <span class="stars" id="pdStars">—</span>
+            <span class="rating-count" id="pdRatingCount">(0 reseñas)</span>
+          </div>
+
+          <!-- Precio + envío + MSI -->
+          <div class="pd-price-block">
+            <div class="pd-price-main" id="pdPrice"></div>
+            <div class="pd-price-sub" id="pdPriceSub"></div>
+            <div class="pd-shipping-info" id="pdShipping"></div>
+            <div class="pd-msi">
+              <div class="pd-msi-label">
+                Paga a meses con tarjeta de crédito
+              </div>
+              <div class="msi-options">
+                <div class="msi-chip active" onclick="selectMSI(this,3)">
+                  3 MSI
+                </div>
+                <div class="msi-chip" onclick="selectMSI(this,6)">6 MSI</div>
+                <div class="msi-chip" onclick="selectMSI(this,12)">12 MSI</div>
+              </div>
+              <div class="msi-detail show" id="msiDetail"></div>
+            </div>
+          </div>
+
+          <!-- Características -->
+          <div class="pd-specs">
+            <div class="pd-specs-title">Características del disco</div>
+            <div class="specs-grid" id="pdSpecs"></div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="pd-actions">
+            <button class="btn-primary" onclick="addCurrentToCart()">
+              Añadir al carrito 🛒
+            </button>
+            <button class="pd-wishlist" title="Guardar en lista">♡</button>
+          </div>
+
+          <!-- Métodos de pago -->
+          <div class="pd-payments">
+            Acepta:
+            <span class="pm-badge">💳 Débito</span>
+            <span class="pm-badge">💳 Crédito</span>
+            <span class="pm-badge">🏦 Transferencia</span>
+            <span class="pm-badge">🔵 PayPal</span>
+            <span class="pm-badge">🏪 OXXO</span>
+          </div>
+
+          <!-- Pestañas -->
+          <div class="pd-tabs">
+            <div class="pd-tab active" onclick="switchPdTab('tracks',this)">
+              Tracklist
+            </div>
+            <div class="pd-tab" onclick="switchPdTab('reviews',this)">
+              Reseñas
+            </div>
+            <div class="pd-tab" onclick="switchPdTab('related',this)">
+              Relacionados
+            </div>
+          </div>
+
+          <!-- TRACKLIST -->
+          <div id="pdTabTracks">
+            <div class="tracks-list" id="pdTrackList"></div>
+          </div>
+
+          <!-- RESEÑAS -->
+          <div id="pdTabReviews" style="display: none">
+            <div class="reviews-header">
+              <h3
+                style="
+                  font-family: var(--font-display);
+                  font-size: 1.1rem;
+                  color: var(--morado-800);
+                "
+              >
+                Reseñas de clientes
+              </h3>
+              <button
+                class="btn-secondary"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem"
+                onclick="document.getElementById('reviewForm').scrollIntoView({behavior:'smooth'})"
+              >
+                Escribir reseña
+              </button>
+            </div>
+            <div class="reviews-summary">
+              <div style="text-align: center">
+                <div class="review-big-num" id="reviewAvg">—</div>
+                <div class="stars">★★★★☆</div>
+                <div
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--texto-suave);
+                    margin-top: 0.3rem;
+                  "
+                  id="reviewTotal"
+                >
+                  0 reseñas
+                </div>
+              </div>
+              <div class="review-bars">
+                <div class="bar-row">
+                  5★
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 60%"></div>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  4★
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 30%"></div>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  3★
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  2★
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  1★
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="reviewsList"></div>
+            <!-- Formulario renderizado dinámicamente por JS según si compró el producto -->
+            <div class="review-form" id="reviewForm"></div>
+          </div>
+
+          <!-- RELACIONADOS -->
+          <div id="pdTabRelated" style="display: none">
+            <div class="related-grid" id="relatedGrid"></div>
+          </div>
+        </div>
+      </div>
+      <footer style="margin-top: 2rem">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <span
+              class="nav-logo"
+              style="color: white; cursor: pointer"
+              onclick="showPage('home')"
+              >Once Upon a Time</span
+            >
+            <p>
+              Tu tienda especializada en discos de vinil nuevos. Porque cada
+              álbum cuenta una historia que merece ser escuchada.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Tienda</h4>
+            <ul>
+              <li><a href="tienda.html">Catálogo</a></li>
+              <li><a onclick="filterGenre('rock')">Rock</a></li>
+              <li><a onclick="filterGenre('pop')">Pop</a></li>
+              <li><a onclick="filterGenre('jazz')">Jazz</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Información</h4>
+            <ul>
+              <li><a href="envios.html">Envíos</a></li>
+              <li>
+                <a onclick="showPolicyTab('devoluciones')">Devoluciones</a>
+              </li>
+              <li><a onclick="showPolicyTab('privacidad')">Privacidad</a></li>
+              <li><a onclick="showPolicyTab('terminos')">Términos</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Cuenta</h4>
+            <ul>
+              <li><a onclick="openAuth('login')">Iniciar sesión</a></li>
+              <li><a onclick="openAuth('register')">Registrarse</a></li>
+              <li>
+                <a onclick="currentUser&&showPage('perfil')">Mi perfil</a>
+              </li>
+              <li>
+                <a href="index.html#contacto">Contacto</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom" style="border-top: none; padding-top: 0">
+          <p>
+            © 2026 Once Upon a Time —
+            <a
+              onclick="showPage('tienda')"
+              style="color: var(--lila-300); cursor: pointer"
+              >← Volver al catálogo</a
+            >
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ================================================================
+     CARRITO DRAWER
+================================================================ -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCartBg(event)">
+      <div class="cart-drawer">
+        <div class="cart-header">
+          <h2>Tu carrito 🛒</h2>
+          <button class="close-btn" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+          <div class="cart-empty">
+            <span class="empty-icon">🎵</span>
+            <p>Tu carrito está vacío.<br />¡Explora el catálogo!</p>
+          </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none">
+          <div class="cart-total">
+            <span>Total</span><strong id="cartTotal">$0.00</strong>
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center"
+            onclick="goToCheckout()"
+          >
+            Ir a pagar →
+          </button>
+          <button
+            class="btn-secondary"
+            style="width: 100%; text-align: center; margin-top: 0.6rem"
+            onclick="showPage('tienda');toggleCart()"
+          >
+            Seguir comprando
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL AUTH
+================================================================ -->
+    <div class="modal-overlay" id="authModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeAuth()">✕</button>
+        <div class="modal-logo">Once Upon a Time</div>
+        <h2 class="modal-title" id="authTitle">Bienvenida</h2>
+        <p class="modal-sub" id="authSub">
+          Inicia sesión para acceder a tu cuenta
+        </p>
+
+        <button class="google-btn" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
+          </svg>
+          Continuar con Google
+        </button>
+        <div class="divider-or"><span>o</span></div>
+
+        <div id="loginForm">
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="loginEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="loginPass"
+              placeholder="Tu contraseña"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="loginWithEmail()"
+          >
+            Iniciar sesión
+          </button>
+          <div class="auth-switch">
+            ¿No tienes cuenta?
+            <a onclick="switchAuthMode('register')">Regístrate aquí</a>
+          </div>
+        </div>
+
+        <div id="registerForm" style="display: none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre</label
+              ><input type="text" id="regName" placeholder="Nombre" />
+            </div>
+            <div class="form-group">
+              <label>Apellido</label
+              ><input type="text" id="regLast" placeholder="Apellido" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="regEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="regPass"
+              placeholder="Mínimo 8 caracteres"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="registerUser()"
+          >
+            Crear cuenta
+          </button>
+          <div class="auth-switch">
+            ¿Ya tienes cuenta?
+            <a onclick="switchAuthMode('login')">Inicia sesión</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL TICKET
+================================================================ -->
+    <div class="modal-overlay" id="ticketModal">
+      <div class="ticket-modal">
+        <button class="modal-close" onclick="closeTicketModal()">✕</button>
+        <div class="ticket-header">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem">🎵</div>
+          <h2>Once Upon a Time</h2>
+          <p>Comprobante de compra</p>
+          <span class="ticket-id" id="ticketOrderId">#OUAT-000000</span>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Datos del pedido</div>
+          <div class="ticket-row">
+            <span>Fecha</span><strong id="tDate">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Cliente</span><strong id="tName">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Correo</span><strong id="tEmail">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Método de pago</span><strong id="tPayment">—</strong>
+          </div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Productos</div>
+          <div id="tItems"></div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Envío</div>
+          <div class="ticket-row">
+            <span>Dirección</span><strong id="tAddress">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Paquetería</span><strong>Estafeta</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Estado</span><strong id="tStatus">En proceso ⏳</strong>
+          </div>
+        </div>
+        <div class="ticket-total-row">
+          <span>Total pagado</span>
+          <span id="tTotal">$0.00</span>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn-primary" onclick="downloadTicketPDF()">
+            ⬇ Descargar PDF
+          </button>
+          <button class="btn-secondary" onclick="resendTicketEmail()">
+            📧 Reenviar al correo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <span id="toastIcon">✅</span>
+      <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

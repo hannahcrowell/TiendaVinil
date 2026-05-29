@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Once Upon a Time — Discos de Vinil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- ================================================================
+     NAVBAR
+================================================================ -->
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <div class="vinyl-spin"></div>
+        Once Upon a Time
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Inicio</a></li>
+        <li><a href="tienda.html">Tienda</a></li>
+        <li><a href="envios.html">Envíos</a></li>
+        <li><a href="politicas.html">Políticas</a></li>
+        <li><a href="index.html#contacto">Contacto</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Carrito <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <div id="navAuthArea">
+          <button class="auth-btn" onclick="openAuth('login')">
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================================================================
+     HOME
+================================================================ -->
+    <div id="page-home" class="page active">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-content">
+          <div class="hero-eyebrow">
+            ✦ Tienda especializada en viniles nuevos
+          </div>
+          <h1 class="hero-title">
+            Cada disco<br /><em>cuenta una historia</em>
+          </h1>
+          <p class="hero-subtitle">
+            Descubre los mejores discos de vinil nuevos — clásicos atemporales y
+            lanzamientos recientes — entregados directo a tu puerta desde
+            cualquier lugar de México.
+          </p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="showPage('tienda')">
+              Explorar catálogo →
+            </button>
+            <button
+              class="btn-secondary"
+              onclick="document.getElementById('sobre').scrollIntoView({behavior:'smooth'})"
+            >
+              Sobre nosotros
+            </button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="vinyl-hero">
+            <div class="vinyl-disc">
+              <div class="vinyl-label">
+                <span class="vinyl-label-text">Once Upon<br />a Time</span>
+                <div class="vinyl-hole"></div>
+              </div>
+            </div>
+            <div class="hero-card c1">
+              <div class="card-label">Envíos a</div>
+              <div class="card-value">Todo México 📦</div>
+            </div>
+            <div class="hero-card c2">
+              <div class="card-label">Viniles nuevos</div>
+              <div class="card-value">+25 títulos</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOVEDADES -->
+      <section class="novedades-section">
+        <span class="section-label">Recién llegados</span>
+        <h2 class="section-title">Novedades destacadas</h2>
+        <p class="section-sub">
+          Los títulos más nuevos y esperados, ahora disponibles.
+        </p>
+        <div class="novedades-grid">
+          <div
+            class="novedad-featured"
+            id="feat-1"
+            onclick="openProduct('550a7fd2-1596-4ece-a547-3487802dae48')"
+          >
+            <div
+              id="novedad-featured-img"
+              style="position: absolute; inset: 0; z-index: 0; opacity: 0.3"
+            ></div>
+            <span class="badge">✦ Novedad</span>
+            <h3>Folklore</h3>
+            <p>Taylor Swift · 2020</p>
+            <span class="price">$880 MXN</span>
+          </div>
+          <div
+            class="novedad-sm"
+            onclick="openProduct('5e418a8e-56d1-49e6-acd1-a50ea20e5b58')"
+          >
+            <div class="novedad-sm-img" id="novedad-sm-1-img">
+              <div class="vinyl-thumb"></div>
+            </div>
+            <h4>Dark Side of the Moon</h4>
+            <div class="artist">Pink Floyd</div>
+            <div class="price-row">
+              <span class="price">$850</span>
+              <button
+                class="btn-primary"
+                style="padding: 0.35rem 0.9rem; font-size: 0.76rem"
+                onclick="event.stopPropagation();addToCart('1')"
+              >
+                + Añadir
+              </button>
+            </div>
+          </div>
+          <div
+            class="novedad-sm"
+            onclick="openProduct('d84478e1-d964-44eb-8673-b2b1e71e1b1e')"
+          >
+            <div class="novedad-sm-img" id="novedad-sm-2-img">
+              <div class="vinyl-thumb"></div>
+            </div>
+            <h4>Random Access Memories</h4>
+            <div class="artist">Daft Punk</div>
+            <div class="price-row">
+              <span class="price">$920</span>
+              <button
+                class="btn-primary"
+                style="padding: 0.35rem 0.9rem; font-size: 0.76rem"
+                onclick="event.stopPropagation();addToCart('3')"
+              >
+                + Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATÁLOGO PREVIEW -->
+      <section>
+        <span class="section-label">Nuestro catálogo</span>
+        <h2 class="section-title">Discos que amarás</h2>
+        <p class="section-sub">
+          Una selección cuidada de viniles nuevos para todos los gustos.
+        </p>
+        <div class="products-grid" id="homeGrid"></div>
+        <div class="text-center mt-4">
+          <button class="btn-primary" onclick="showPage('tienda')">
+            Ver catálogo completo →
+          </button>
+        </div>
+      </section>
+
+      <!-- SOBRE NOSOTROS -->
+      <section class="about-section" id="sobre">
+        <div class="about-content">
+          <span class="section-label">Nuestra historia</span>
+          <h2 class="section-title">
+            Más que una tienda,<br />un amor por el vinil
+          </h2>
+          <div class="divider"></div>
+          <p>
+            Once Upon a Time nació de una necesidad real: encontrar discos de
+            vinil nuevos de manera fácil, desde cualquier rincón de México.
+            Porque cada disco cuenta una historia, y queremos que esa historia
+            llegue a tus manos.
+          </p>
+          <p>
+            Somos una microempresa comprometida con ofrecer la mejor experiencia
+            de compra en línea para amantes del formato análogo — desde
+            coleccionistas con décadas de experiencia hasta quienes comienzan su
+            primera colección.
+          </p>
+          <div class="about-stats">
+            <div class="stat">
+              <div class="stat-num">25+</div>
+              <div class="stat-label">Títulos en catálogo</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">3–7</div>
+              <div class="stat-label">Días de entrega</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">100%</div>
+              <div class="stat-label">Viniles nuevos</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">MX</div>
+              <div class="stat-label">Cobertura nacional</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-visual">
+          <div class="vinyl-stack">
+            <div class="disc"></div>
+            <div class="disc"></div>
+            <div class="disc"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACTO -->
+      <section id="contacto" class="contact-section">
+        <div class="contact-container">
+          <div class="contact-form">
+            <h3
+              style="
+                font-family: var(--font-display);
+                font-size: 1.2rem;
+                color: var(--morado-800);
+                margin-bottom: 1.3rem;
+              "
+            >
+              Envíanos un mensaje
+            </h3>
+            <form action="https://formsubmit.co/mfhm1316@gmail.com" method="POST">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nombre">Nombre</label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    placeholder="Tu nombre"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="correo">Correo</label>
+                  <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    placeholder="tu@correo.com"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="asunto">Asunto</label>
+                <select id="asunto" name="asunto">
+                  <option>Consulta sobre producto</option>
+                  <option>Estado de pedido</option>
+                  <option>Devolución</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="mensaje">Mensaje</label>
+                <textarea
+                  id="mensaje"
+                  name="mensaje"
+                  placeholder="¿En qué te ayudamos?"
+                  required
+                ></textarea>
+              </div>
+              <input type="hidden" name="_captcha" value="false" />
+              <input
+                type="hidden"
+                name="_next"
+                value="http://127.0.0.1:5500/index.html"
+              />
+              <button type="submit" class="btn-primary submit-btn">
+                Enviar mensaje
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <span
+              class="nav-logo"
+              style="color: white; cursor: pointer"
+              onclick="showPage('home')"
+              >Once Upon a Time</span
+            >
+            <p>
+              Tu tienda especializada en discos de vinil nuevos. Porque cada
+              álbum cuenta una historia que merece ser escuchada.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Tienda</h4>
+            <ul>
+              <li><a href="tienda.html">Catálogo</a></li>
+              <li><a onclick="filterGenre('rock')">Rock</a></li>
+              <li><a onclick="filterGenre('pop')">Pop</a></li>
+              <li><a onclick="filterGenre('jazz')">Jazz</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Información</h4>
+            <ul>
+              <li><a href="envios.html">Envíos</a></li>
+              <li>
+                <a onclick="showPolicyTab('devoluciones')">Devoluciones</a>
+              </li>
+              <li><a onclick="showPolicyTab('privacidad')">Privacidad</a></li>
+              <li><a onclick="showPolicyTab('terminos')">Términos</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Cuenta</h4>
+            <ul>
+              <li><a onclick="openAuth('login')">Iniciar sesión</a></li>
+              <li><a onclick="openAuth('register')">Registrarse</a></li>
+              <li>
+                <a onclick="currentUser&&showPage('perfil')">Mi perfil</a>
+              </li>
+              <li>
+                <a href="index.html#contacto">Contacto</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            © 2026 Once Upon a Time. Todos los derechos reservados. Ecatepec de
+            Morelos, México.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ================================================================
+     CARRITO DRAWER
+================================================================ -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCartBg(event)">
+      <div class="cart-drawer">
+        <div class="cart-header">
+          <h2>Tu carrito 🛒</h2>
+          <button class="close-btn" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+          <div class="cart-empty">
+            <span class="empty-icon">🎵</span>
+            <p>Tu carrito está vacío.<br />¡Explora el catálogo!</p>
+          </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none">
+          <div class="cart-total">
+            <span>Total</span><strong id="cartTotal">$0.00</strong>
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center"
+            onclick="goToCheckout()"
+          >
+            Ir a pagar →
+          </button>
+          <button
+            class="btn-secondary"
+            style="width: 100%; text-align: center; margin-top: 0.6rem"
+            onclick="showPage('tienda');toggleCart()"
+          >
+            Seguir comprando
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL AUTH
+================================================================ -->
+    <div class="modal-overlay" id="authModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeAuth()">✕</button>
+        <div class="modal-logo">Once Upon a Time</div>
+        <h2 class="modal-title" id="authTitle">Bienvenida</h2>
+        <p class="modal-sub" id="authSub">
+          Inicia sesión para acceder a tu cuenta
+        </p>
+
+        <button class="google-btn" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
+          </svg>
+          Continuar con Google
+        </button>
+        <div class="divider-or"><span>o</span></div>
+
+        <div id="loginForm">
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="loginEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="loginPass"
+              placeholder="Tu contraseña"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="loginWithEmail()"
+          >
+            Iniciar sesión
+          </button>
+          <div class="auth-switch">
+            ¿No tienes cuenta?
+            <a onclick="switchAuthMode('register')">Regístrate aquí</a>
+          </div>
+        </div>
+
+        <div id="registerForm" style="display: none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre</label
+              ><input type="text" id="regName" placeholder="Nombre" />
+            </div>
+            <div class="form-group">
+              <label>Apellido</label
+              ><input type="text" id="regLast" placeholder="Apellido" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Correo</label
+            ><input type="email" id="regEmail" placeholder="tu@correo.com" />
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label
+            ><input
+              type="password"
+              id="regPass"
+              placeholder="Mínimo 8 caracteres"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 0.5rem"
+            onclick="registerUser()"
+          >
+            Crear cuenta
+          </button>
+          <div class="auth-switch">
+            ¿Ya tienes cuenta?
+            <a onclick="switchAuthMode('login')">Inicia sesión</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+     MODAL TICKET
+================================================================ -->
+    <div class="modal-overlay" id="ticketModal">
+      <div class="ticket-modal">
+        <button class="modal-close" onclick="closeTicketModal()">✕</button>
+        <div class="ticket-header">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem">🎵</div>
+          <h2>Once Upon a Time</h2>
+          <p>Comprobante de compra</p>
+          <span class="ticket-id" id="ticketOrderId">#OUAT-000000</span>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Datos del pedido</div>
+          <div class="ticket-row">
+            <span>Fecha</span><strong id="tDate">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Cliente</span><strong id="tName">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Correo</span><strong id="tEmail">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Método de pago</span><strong id="tPayment">—</strong>
+          </div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Productos</div>
+          <div id="tItems"></div>
+        </div>
+        <div class="ticket-section">
+          <div class="ticket-section-title">Envío</div>
+          <div class="ticket-row">
+            <span>Dirección</span><strong id="tAddress">—</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Paquetería</span><strong>Estafeta</strong>
+          </div>
+          <div class="ticket-row">
+            <span>Estado</span><strong id="tStatus">En proceso ⏳</strong>
+          </div>
+        </div>
+        <div class="ticket-total-row">
+          <span>Total pagado</span>
+          <span id="tTotal">$0.00</span>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn-primary" onclick="downloadTicketPDF()">
+            ⬇ Descargar PDF
+          </button>
+          <button class="btn-secondary" onclick="resendTicketEmail()">
+            📧 Reenviar al correo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <span id="toastIcon">✅</span>
+      <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
