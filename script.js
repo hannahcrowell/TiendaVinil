@@ -1,5 +1,5 @@
 /* =====================================================
-   ONCE UPON A TIME — script.js
+        ONCE UPON A TIME — script.js
    Tienda de Discos de Vinil
    ===================================================== */
 
