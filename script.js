@@ -498,6 +498,7 @@ const sampleProducts = [
 function adaptProduct(row) {
   return {
     id: row.id,
+    supabaseId: row.id,   // UUID de Supabase — necesario para reseñas y carrito
     name: row.nombre,
     artist: row.artista,
     genre: row.genero_nombre || row.genero_slug,
@@ -1260,12 +1261,13 @@ async function submitReview() {
     return;
   }
 
-  if (authToken && currentProduct.supabaseId) {
+  const productoId = currentProduct.supabaseId || currentProduct.id;
+  if (authToken && productoId) {
     try {
       await sb.authPost(
         "reseñas",
         {
-          producto_id: currentProduct.supabaseId,
+          producto_id: productoId,
           usuario_id: currentUser.supabaseId || null,
           nombre: name,
           estrellas: reviewStarSel,
@@ -1276,13 +1278,16 @@ async function submitReview() {
         authToken
       );
     } catch (e) {
-      console.error("Error al guardar reseña en Supabase:", e.message);
-      const msg = e.message.includes("Solo puedes")
+      console.error("[Reseña] Error Supabase:", e.message);
+      const msg = e.message.includes("Solo puedes") || e.message.includes("hayas comprado")
         ? "Solo puedes reseñar discos que hayas comprado"
         : `Error al publicar la reseña: ${e.message}`;
       showToast("⚠️", msg);
       return;
     }
+  } else if (!authToken) {
+    showToast("⚠️", "Debes iniciar sesión para publicar una reseña");
+    return;
   }
 
   const review = {
