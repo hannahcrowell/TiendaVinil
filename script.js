@@ -12,13 +12,19 @@ const SUPABASE_KEY =
 
 /* Cliente Supabase REST (sin SDK externo) */
 const sb = {
+  _tbl(name) {
+    return encodeURIComponent(name);
+  },
   async get(table, params = "") {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-      },
-    });
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${this._tbl(table)}${params}`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   },
@@ -37,14 +43,17 @@ const sb = {
     return r.json();
   },
   async authGet(table, params, token) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}` },
-    });
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${this._tbl(table)}${params}`,
+      {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}` },
+      }
+    );
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   },
   async authPost(table, body, token) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${this._tbl(table)}`, {
       method: "POST",
       headers: {
         apikey: SUPABASE_KEY,
@@ -93,27 +102,33 @@ const sb = {
     return r.json();
   },
   async authPatch(table, params, body, token) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-      method: "PATCH",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify(body),
-    });
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${this._tbl(table)}${params}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(body),
+      }
+    );
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   },
   async authDelete(table, params, token) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-      method: "DELETE",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${this._tbl(table)}${params}`,
+      {
+        method: "DELETE",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (!r.ok) throw new Error(await r.text());
     return r;
   },
@@ -149,7 +164,8 @@ let productsCache = [];
 let storeConfig = {
   envio_costo: 120,
   envio_gratis_min: 1500,
-  envio_mensaje: "Realizamos envíos a toda la República Mexicana por Estafeta y DHL. El tiempo promedio es de 3 a 7 días hábiles tras confirmarse el pago. Una vez enviado, recibirás por correo y en tu perfil el número de guía para rastrear el paquete en tiempo real."
+  envio_mensaje:
+    "Realizamos envíos a toda la República Mexicana por Estafeta y DHL. El tiempo promedio es de 3 a 7 días hábiles tras confirmarse el pago. Una vez enviado, recibirás por correo y en tu perfil el número de guía para rastrear el paquete en tiempo real.",
 };
 
 async function loadStoreConfig() {
@@ -157,8 +173,11 @@ async function loadStoreConfig() {
     const res = await supa.get("configuracion");
     const json = await res.json();
     if (json && json.length > 0) {
-      json.forEach(item => {
-        storeConfig[item.clave] = typeof storeConfig[item.clave] === "number" ? parseFloat(item.valor) : item.valor;
+      json.forEach((item) => {
+        storeConfig[item.clave] =
+          typeof storeConfig[item.clave] === "number"
+            ? parseFloat(item.valor)
+            : item.valor;
       });
     }
   } catch (err) {
@@ -168,35 +187,40 @@ async function loadStoreConfig() {
 
 async function saveStoreConfig() {
   if (!currentUser) return;
-  const costo = parseFloat(document.getElementById('configEnvioCosto').value) || 120;
-  const gratisMin = parseFloat(document.getElementById('configEnvioGratis').value) || 1500;
-  const mensaje = document.getElementById('configEnvioMensaje').value || "";
+  const costo =
+    parseFloat(document.getElementById("configEnvioCosto").value) || 120;
+  const gratisMin =
+    parseFloat(document.getElementById("configEnvioGratis").value) || 1500;
+  const mensaje = document.getElementById("configEnvioMensaje").value || "";
 
   try {
     showToast("⏳", "Guardando configuración...");
     const updates = [
       { clave: "envio_costo", valor: costo },
       { clave: "envio_gratis_min", valor: gratisMin },
-      { clave: "envio_mensaje", valor: mensaje }
+      { clave: "envio_mensaje", valor: mensaje },
     ];
-    
+
     for (const update of updates) {
-      await fetch(`${SUPABASE_URL}/rest/v1/configuracion?clave=eq.${update.clave}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${authToken}`,
-          Prefer: "return=minimal"
-        },
-        body: JSON.stringify({ valor: update.valor })
-      });
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/configuracion?clave=eq.${update.clave}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${authToken}`,
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ valor: update.valor }),
+        }
+      );
     }
-    
+
     storeConfig.envio_costo = costo;
     storeConfig.envio_gratis_min = gratisMin;
     storeConfig.envio_mensaje = mensaje;
-    
+
     showToast("✅", "Configuración guardada exitosamente");
   } catch (err) {
     console.error(err);
@@ -498,7 +522,7 @@ const sampleProducts = [
 function adaptProduct(row) {
   return {
     id: row.id,
-    supabaseId: row.id,   // UUID de Supabase — necesario para reseñas y carrito
+    supabaseId: row.id, // UUID de Supabase — necesario para reseñas y carrito
     name: row.nombre,
     artist: row.artista,
     genre: row.genero_nombre || row.genero_slug,
@@ -573,13 +597,13 @@ function showPage(id) {
   }
 
   const pageMapping = {
-    'home': 'index.html',
-    'tienda': 'tienda.html',
-    'product': 'producto.html',
-    'envios': 'envios.html',
-    'politicas': 'politicas.html',
-    'checkout': 'checkout.html',
-    'perfil': 'perfil.html'
+    home: "index.html",
+    tienda: "tienda.html",
+    product: "producto.html",
+    envios: "envios.html",
+    politicas: "politicas.html",
+    checkout: "checkout.html",
+    perfil: "perfil.html",
   };
 
   const targetPage = pageMapping[id];
@@ -801,9 +825,9 @@ async function loadShopProducts(localList) {
     adapted.forEach((p) => {
       if (!productsCache.find((c) => c.id === p.id)) productsCache.push(p);
     });
-    
+
     const sortedAdapted = [...adapted].sort(sortFn);
-    
+
     if (count)
       count.textContent = `${sortedAdapted.length} producto${
         sortedAdapted.length !== 1 ? "s" : ""
@@ -882,9 +906,7 @@ async function openProduct(idOrObj) {
   try {
     const reviews = await sb.get(
       "reseñas",
-      `?producto_id=eq.${
-        p.supabaseId || p.id
-      }&order=created_at.desc`
+      `?producto_id=eq.${p.supabaseId || p.id}&order=created_at.desc`
     );
     if (reviews.length) p.reviews = reviews;
   } catch (e) {
@@ -1262,10 +1284,19 @@ async function submitReview() {
   }
 
   const productoId = currentProduct.supabaseId || currentProduct.id;
+  if (!authToken) {
+    showToast("⚠️", "Debes iniciar sesión para publicar una reseña");
+    return;
+  }
+  if (!productoId) {
+    showToast("⚠️", "No se pudo identificar el producto");
+    return;
+  }
+
   if (authToken && productoId) {
     try {
       await sb.authPost(
-        "reseñas",
+        "rese\u00f1as",
         {
           producto_id: productoId,
           usuario_id: currentUser.supabaseId || null,
@@ -1279,15 +1310,31 @@ async function submitReview() {
       );
     } catch (e) {
       console.error("[Reseña] Error Supabase:", e.message);
-      const msg = e.message.includes("Solo puedes") || e.message.includes("hayas comprado")
-        ? "Solo puedes reseñar discos que hayas comprado"
-        : `Error al publicar la reseña: ${e.message}`;
-      showToast("⚠️", msg);
+      let userMsg = "Error al publicar la reseña";
+      if (
+        e.message.includes("42501") ||
+        e.message.includes("permission") ||
+        e.message.includes("policy")
+      ) {
+        userMsg =
+          "Sin permiso para publicar reseñas. Verifica las políticas RLS en Supabase (tabla reseñas → INSERT).";
+      } else if (
+        e.message.includes("23503") ||
+        e.message.includes("foreign key")
+      ) {
+        userMsg =
+          "Error de referencia: el producto_id no existe en la tabla productos.";
+      } else if (
+        e.message.includes("Solo puedes") ||
+        e.message.includes("hayas comprado")
+      ) {
+        userMsg = "Solo puedes reseñar discos que hayas comprado";
+      } else {
+        userMsg = `Error al publicar: ${e.message}`;
+      }
+      showToast("⚠️", userMsg);
       return;
     }
-  } else if (!authToken) {
-    showToast("⚠️", "Debes iniciar sesión para publicar una reseña");
-    return;
   }
 
   const review = {
@@ -1418,7 +1465,8 @@ function goToCheckout() {
    ===================================================== */
 function updateOrderSummary() {
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = subtotal >= storeConfig.envio_gratis_min ? 0 : storeConfig.envio_costo;
+  const shipping =
+    subtotal >= storeConfig.envio_gratis_min ? 0 : storeConfig.envio_costo;
   document.getElementById("orderItems").innerHTML = cart.length
     ? cart
         .map(
@@ -1506,7 +1554,8 @@ async function processOrder() {
   }
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = subtotal >= storeConfig.envio_gratis_min ? 0 : storeConfig.envio_costo;
+  const shipping =
+    subtotal >= storeConfig.envio_gratis_min ? 0 : storeConfig.envio_costo;
   const total = subtotal + shipping;
   const orderId = "OUAT-" + Date.now().toString().slice(-6);
   const isOxxo = selectedPayment === "oxxo";
@@ -1945,7 +1994,11 @@ function resendTicketEmail() {
    PERFIL DE USUARIO
    ===================================================== */
 function isAdmin() {
-  return currentUser && (currentUser.email === "mfhm1316@gmail.com" || currentUser.email === "mfhm1316@gmial.com");
+  return (
+    currentUser &&
+    (currentUser.email === "mfhm1316@gmail.com" ||
+      currentUser.email === "mfhm1316@gmial.com")
+  );
 }
 
 /* Carga (o recarga) los pedidos del usuario desde Supabase.
@@ -1953,11 +2006,11 @@ function isAdmin() {
    la página de producto siempre tenga los pedidos actualizados
    antes de decidir si mostrar el formulario de reseña. */
 async function loadUserOrders() {
-  if (!authToken) return;
+  if (!authToken || !currentUser?.supabaseId) return;
   try {
     const pedidos = await sb.authGet(
       "pedidos_con_items",
-      "?order=created_at.desc",
+      `?usuario_id=eq.${currentUser.supabaseId}&order=created_at.desc`,
       authToken
     );
     userOrders = Array.isArray(pedidos)
@@ -1997,7 +2050,7 @@ async function loadProfile() {
   document.getElementById("profileEmail").textContent = currentUser.email || "";
   document.getElementById("profileAvatar").textContent = (currentUser.name ||
     "U")[0].toUpperCase();
-  
+
   const navAdmin = document.getElementById("nav-admin");
   const navAdminConfig = document.getElementById("nav-admin-config");
   const navAdminOrders = document.getElementById("nav-admin-orders");
@@ -2010,15 +2063,15 @@ async function loadProfile() {
   if (navAdminOrders) {
     navAdminOrders.style.display = isAdmin() ? "flex" : "none";
   }
-  
+
   if (isAdmin()) {
     const cfCosto = document.getElementById("configEnvioCosto");
     const cfGratis = document.getElementById("configEnvioGratis");
     const cfMsg = document.getElementById("configEnvioMensaje");
-    if(cfCosto) cfCosto.value = storeConfig.envio_costo;
-    if(cfGratis) cfGratis.value = storeConfig.envio_gratis_min;
-    if(cfMsg) cfMsg.value = storeConfig.envio_mensaje;
-    
+    if (cfCosto) cfCosto.value = storeConfig.envio_costo;
+    if (cfGratis) cfGratis.value = storeConfig.envio_gratis_min;
+    if (cfMsg) cfMsg.value = storeConfig.envio_mensaje;
+
     loadAdminOrders();
   }
 
@@ -2034,22 +2087,28 @@ async function loadProfile() {
 
   if (authToken) {
     try {
-      const perfiles = await sb.authGet("perfiles", `?id=eq.${currentUser.supabaseId}`, authToken);
+      const perfiles = await sb.authGet(
+        "perfiles",
+        `?id=eq.${currentUser.supabaseId}`,
+        authToken
+      );
       if (perfiles && perfiles.length) {
         const profile = perfiles[0];
         if (sName) sName.value = profile.nombre || "";
         if (sLast) sLast.value = profile.apellido || "";
         if (sEmail) sEmail.value = profile.email || "";
         if (sPhone) sPhone.value = profile.telefono || "";
-        
+
         currentUser.name = profile.nombre || currentUser.name;
         currentUser.apellido = profile.apellido || "";
         currentUser.telefono = profile.telefono || "";
         currentUser.email = profile.email || currentUser.email;
         localStorage.setItem("ouat_user", JSON.stringify(currentUser));
-        
-        document.getElementById("profileName").textContent = currentUser.name + (profile.apellido ? " " + profile.apellido : "");
-        document.getElementById("profileAvatar").textContent = (currentUser.name || "U")[0].toUpperCase();
+
+        document.getElementById("profileName").textContent =
+          currentUser.name + (profile.apellido ? " " + profile.apellido : "");
+        document.getElementById("profileAvatar").textContent =
+          (currentUser.name || "U")[0].toUpperCase();
       }
     } catch (e) {
       console.warn("No se pudo obtener el perfil de Supabase:", e.message);
@@ -2070,7 +2129,9 @@ async function saveUserProfile() {
   const sLast = document.getElementById("settingLast")?.value.trim() || "";
   const sEmail = document.getElementById("settingEmail")?.value.trim();
   const sPhone = document.getElementById("settingPhone")?.value.trim() || "";
-  const sPass = document.querySelector("#panel-settings input[type=password]")?.value;
+  const sPass = document.querySelector(
+    "#panel-settings input[type=password]"
+  )?.value;
 
   if (!sName || !sEmail) {
     showToast("⚠️", "Nombre y correo son requeridos");
@@ -2079,15 +2140,20 @@ async function saveUserProfile() {
 
   try {
     showToast("⏳", "Guardando cambios...");
-    
+
     // 1. Update the 'perfiles' table
-    await sb.authPatch("perfiles", `?id=eq.${currentUser.supabaseId}`, {
-      nombre: sName,
-      apellido: sLast,
-      email: sEmail,
-      telefono: sPhone,
-      updated_at: new Date().toISOString()
-    }, authToken);
+    await sb.authPatch(
+      "perfiles",
+      `?id=eq.${currentUser.supabaseId}`,
+      {
+        nombre: sName,
+        apellido: sLast,
+        email: sEmail,
+        telefono: sPhone,
+        updated_at: new Date().toISOString(),
+      },
+      authToken
+    );
 
     // 2. Update auth user metadata/password if password is provided
     if (sPass && sPass.trim().length > 0) {
@@ -2100,12 +2166,14 @@ async function saveUserProfile() {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password: sPass })
+        body: JSON.stringify({ password: sPass }),
       });
       if (!authUpdateRes.ok) {
-        throw new Error("No se pudo actualizar la contraseña: " + await authUpdateRes.text());
+        throw new Error(
+          "No se pudo actualizar la contraseña: " + (await authUpdateRes.text())
+        );
       }
     }
 
@@ -2327,55 +2395,84 @@ async function loadAdminOrders() {
   const container = document.getElementById("adminOrdersList");
   if (!container) return;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?order=created_at.desc`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${authToken}`
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/pedidos?order=created_at.desc`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${authToken}`,
+        },
       }
-    });
+    );
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
-    
-    container.innerHTML = data.length === 0 
-      ? '<tr><td colspan="7" style="text-align:center;color:#666;padding:2rem;">No hay pedidos.</td></tr>' 
-      : "";
-      
-    data.forEach(order => {
+
+    container.innerHTML =
+      data.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;color:#666;padding:2rem;">No hay pedidos.</td></tr>'
+        : "";
+
+    data.forEach((order) => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>
-          <div style="font-weight:600">${new Date(order.created_at).toLocaleDateString()}</div>
-          <div style="font-size:0.75rem; color:var(--texto-suave)">${order.numero}</div>
+          <div style="font-weight:600">${new Date(
+            order.created_at
+          ).toLocaleDateString()}</div>
+          <div style="font-size:0.75rem; color:var(--texto-suave)">${
+            order.numero
+          }</div>
         </td>
         <td>
           <div style="font-weight:600">${order.cliente_nombre}</div>
-          <div style="font-size:0.75rem; color:var(--texto-suave)">${order.cliente_email}</div>
+          <div style="font-size:0.75rem; color:var(--texto-suave)">${
+            order.cliente_email
+          }</div>
         </td>
         <td>$${Number(order.total || 0).toFixed(2)}</td>
         <td>
-          <select id="estado-${order.id}" style="padding:0.3rem; border-radius:6px; font-size: 0.8rem; border: 1px solid var(--lila-200);">
-            <option value="pendiente_pago" ${order.estado === 'pendiente_pago' ? 'selected' : ''}>Pendiente Pago</option>
-            <option value="processing" ${order.estado === 'processing' ? 'selected' : ''}>Procesando</option>
-            <option value="shipped" ${order.estado === 'shipped' ? 'selected' : ''}>Enviado</option>
-            <option value="delivered" ${order.estado === 'delivered' ? 'selected' : ''}>Entregado</option>
-            <option value="cancelled" ${order.estado === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+          <select id="estado-${
+            order.id
+          }" style="padding:0.3rem; border-radius:6px; font-size: 0.8rem; border: 1px solid var(--lila-200);">
+            <option value="pendiente_pago" ${
+              order.estado === "pendiente_pago" ? "selected" : ""
+            }>Pendiente Pago</option>
+            <option value="processing" ${
+              order.estado === "processing" ? "selected" : ""
+            }>Procesando</option>
+            <option value="shipped" ${
+              order.estado === "shipped" ? "selected" : ""
+            }>Enviado</option>
+            <option value="delivered" ${
+              order.estado === "delivered" ? "selected" : ""
+            }>Entregado</option>
+            <option value="cancelled" ${
+              order.estado === "cancelled" ? "selected" : ""
+            }>Cancelado</option>
           </select>
         </td>
         <td>
-          <input type="text" id="paq-${order.id}" value="${order.paqueteria || ''}" placeholder="Ej. DHL" style="width:100px; padding:0.3rem; border-radius:6px; border:1px solid var(--lila-200); font-size:0.8rem;" />
+          <input type="text" id="paq-${order.id}" value="${
+        order.paqueteria || ""
+      }" placeholder="Ej. DHL" style="width:100px; padding:0.3rem; border-radius:6px; border:1px solid var(--lila-200); font-size:0.8rem;" />
         </td>
         <td>
-          <input type="text" id="guia-${order.id}" value="${order.guia_numero || ''}" placeholder="Núm. Guía" style="width:120px; padding:0.3rem; border-radius:6px; border:1px solid var(--lila-200); font-size:0.8rem;" />
+          <input type="text" id="guia-${order.id}" value="${
+        order.guia_numero || ""
+      }" placeholder="Núm. Guía" style="width:120px; padding:0.3rem; border-radius:6px; border:1px solid var(--lila-200); font-size:0.8rem;" />
         </td>
         <td>
-          <button class="btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px;" onclick="updateAdminOrder('${order.id}')">Guardar</button>
+          <button class="btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px;" onclick="updateAdminOrder('${
+            order.id
+          }')">Guardar</button>
         </td>
       `;
       container.appendChild(row);
     });
-  } catch(err) {
+  } catch (err) {
     console.error(err);
-    container.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;padding:2rem;">Error cargando pedidos.</td></tr>';
+    container.innerHTML =
+      '<tr><td colspan="7" style="text-align:center;color:red;padding:2rem;">Error cargando pedidos.</td></tr>';
   }
 }
 
@@ -2386,18 +2483,18 @@ async function updateAdminOrder(id) {
   try {
     showToast("⏳", "Actualizando pedido...");
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${authToken}`,
-        Prefer: 'return=minimal'
+        Prefer: "return=minimal",
       },
-      body: JSON.stringify({ estado, paqueteria, guia_numero })
+      body: JSON.stringify({ estado, paqueteria, guia_numero }),
     });
     if (!res.ok) throw new Error(await res.text());
     showToast("✅", "Pedido actualizado correctamente");
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     showToast("❌", "Error al actualizar");
   }
@@ -2413,26 +2510,39 @@ async function loadAdminCatalog() {
   container.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--texto-suave);padding:2rem;">Cargando catálogo...</td></tr>`;
 
   try {
-    const products = await sb.authGet("productos", "?order=created_at.desc", authToken);
-    
+    const products = await sb.authGet(
+      "productos",
+      "?order=created_at.desc",
+      authToken
+    );
+
     if (!products || !products.length) {
       container.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--texto-suave);padding:2rem;">No hay productos en la tienda.</td></tr>`;
       return;
     }
 
-    container.innerHTML = products.map((p) => {
-      const img = p.imagen_url ? 
-        (p.imagen_url.startsWith("http") ? p.imagen_url : `img/${p.imagen_url}`) : 
-        "img/cover_placeholder.png";
+    container.innerHTML = products
+      .map((p) => {
+        const img = p.imagen_url
+          ? p.imagen_url.startsWith("http")
+            ? p.imagen_url
+            : `img/${p.imagen_url}`
+          : "img/cover_placeholder.png";
 
-      return `
+        return `
         <tr>
           <td>
-            <div style="font-weight:700;color:var(--morado-800);font-size:0.92rem;">${p.nombre}</div>
-            <div style="font-size:0.75rem;color:var(--texto-suave)">ID: ${p.id}</div>
+            <div style="font-weight:700;color:var(--morado-800);font-size:0.92rem;">${
+              p.nombre
+            }</div>
+            <div style="font-size:0.75rem;color:var(--texto-suave)">ID: ${
+              p.id
+            }</div>
           </td>
           <td>${p.artista}</td>
-          <td style="text-transform:capitalize;">${p.genero_slug || p.genero || "Sin género"}</td>
+          <td style="text-transform:capitalize;">${
+            p.genero_slug || p.genero || "Sin género"
+          }</td>
           <td><strong>$${parseFloat(p.precio).toFixed(2)} MXN</strong></td>
           <td>${p.stock}</td>
           <td>
@@ -2442,15 +2552,20 @@ async function loadAdminCatalog() {
           </td>
           <td>
             <div class="admin-actions-cell">
-              <button class="btn-action" onclick="openAdminProductForm('${p.id}')" title="Editar producto">✏️</button>
-              <button class="btn-action btn-delete" onclick="toggleProductStatus('${p.id}', ${p.activo})" title="${p.activo ? "Desactivar" : "Activar"}">
+              <button class="btn-action" onclick="openAdminProductForm('${
+                p.id
+              }')" title="Editar producto">✏️</button>
+              <button class="btn-action btn-delete" onclick="toggleProductStatus('${
+                p.id
+              }', ${p.activo})" title="${p.activo ? "Desactivar" : "Activar"}">
                 ${p.activo ? "🗑️" : "✅"}
               </button>
             </div>
           </td>
         </tr>
       `;
-    }).join("");
+      })
+      .join("");
   } catch (e) {
     console.error("Error cargando catálogo admin:", e);
     container.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--error);padding:2rem;">Error al cargar el catálogo: ${e.message}</td></tr>`;
@@ -2463,8 +2578,16 @@ async function toggleProductStatus(productId, currentlyActive) {
     return;
   }
   try {
-    await sb.authPatch("productos", `?id=eq.${productId}`, { activo: !currentlyActive }, authToken);
-    showToast("✅", `Producto ${currentlyActive ? 'desactivado' : 'activado'} con éxito`);
+    await sb.authPatch(
+      "productos",
+      `?id=eq.${productId}`,
+      { activo: !currentlyActive },
+      authToken
+    );
+    showToast(
+      "✅",
+      `Producto ${currentlyActive ? "desactivado" : "activado"} con éxito`
+    );
     loadAdminCatalog();
   } catch (e) {
     console.error("Error al cambiar estado del producto:", e);
@@ -2483,21 +2606,26 @@ async function openAdminProductForm(productId = null) {
   if (container) container.innerHTML = "";
 
   document.getElementById("formProductId").value = productId || "";
-  
+
   if (productId) {
     document.getElementById("adminFormTitle").textContent = "Editar Producto";
-    document.getElementById("adminFormSub").textContent = "Modifica los detalles del vinilo y su tracklist";
+    document.getElementById("adminFormSub").textContent =
+      "Modifica los detalles del vinilo y su tracklist";
     document.getElementById("btnSaveProduct").textContent = "Guardar Cambios";
 
     try {
       showToast("⏳", "Cargando datos del producto...");
-      const res = await sb.authGet("productos", `?id=eq.${productId}`, authToken);
+      const res = await sb.authGet(
+        "productos",
+        `?id=eq.${productId}`,
+        authToken
+      );
       if (!res || !res.length) {
         showToast("⚠️", "No se encontró el producto");
         return;
       }
       const p = res[0];
-      
+
       document.getElementById("prodName").value = p.nombre || "";
       document.getElementById("prodArtist").value = p.artista || "";
       document.getElementById("prodGenre").value = p.genero_slug || "otros";
@@ -2506,7 +2634,8 @@ async function openAdminProductForm(productId = null) {
       document.getElementById("prodYear").value = p.anio || "";
       document.getElementById("prodFormat").value = p.formato || "LP";
       document.getElementById("prodRPM").value = p.rpm || "33 RPM";
-      document.getElementById("prodMaterial").value = p.material || "Vinilo negro 180g";
+      document.getElementById("prodMaterial").value =
+        p.material || "Vinilo negro 180g";
       document.getElementById("prodEstado").value = p.estado || "Nuevo";
       document.getElementById("prodBadge").value = p.badge || "";
       document.getElementById("prodImage").value = p.imagen_url || "";
@@ -2516,7 +2645,11 @@ async function openAdminProductForm(productId = null) {
       document.getElementById("prodActive").checked = !!p.activo;
 
       // Cargar canciones
-      const tracks = await sb.authGet("tracks", `?producto_id=eq.${productId}&order=lado.asc,numero.asc`, authToken);
+      const tracks = await sb.authGet(
+        "tracks",
+        `?producto_id=eq.${productId}&order=lado.asc,numero.asc`,
+        authToken
+      );
       if (tracks && tracks.length) {
         tracks.forEach((t) => {
           addTrackRowForm(t.lado, t.numero, t.nombre, t.duracion);
@@ -2529,12 +2662,14 @@ async function openAdminProductForm(productId = null) {
       showToast("⚠️", `Error: ${e.message}`);
     }
   } else {
-    document.getElementById("adminFormTitle").textContent = "Agregar Nuevo Producto";
-    document.getElementById("adminFormSub").textContent = "Llena los detalles del vinilo para publicarlo en la tienda";
+    document.getElementById("adminFormTitle").textContent =
+      "Agregar Nuevo Producto";
+    document.getElementById("adminFormSub").textContent =
+      "Llena los detalles del vinilo para publicarlo en la tienda";
     document.getElementById("btnSaveProduct").textContent = "Guardar Producto";
     document.getElementById("prodIsNew").checked = false;
     document.getElementById("prodActive").checked = true;
-    
+
     addTrackRowForm();
   }
 
@@ -2565,7 +2700,9 @@ function addTrackRowForm(lado = "A", numero = "", nombre = "", duracion = "") {
       <option value="C" ${lado === "C" ? "selected" : ""}>C</option>
       <option value="D" ${lado === "D" ? "selected" : ""}>D</option>
     </select>
-    <input type="number" class="track-numero" required placeholder="Nº" value="${numero || (container.children.length + 1)}" style="padding:0.45rem 0.65rem !important;border-radius:8px !important;font-size:0.85rem !important;height:34px !important;margin:0 !important;" />
+    <input type="number" class="track-numero" required placeholder="Nº" value="${
+      numero || container.children.length + 1
+    }" style="padding:0.45rem 0.65rem !important;border-radius:8px !important;font-size:0.85rem !important;height:34px !important;margin:0 !important;" />
     <input type="text" class="track-nombre" required placeholder="Nombre de la pista" value="${nombre}" style="padding:0.45rem 0.65rem !important;border-radius:8px !important;font-size:0.85rem !important;height:34px !important;margin:0 !important;" />
     <input type="text" class="track-duracion" placeholder="Min:Seg" value="${duracion}" style="padding:0.45rem 0.65rem !important;border-radius:8px !important;font-size:0.85rem !important;height:34px !important;margin:0 !important;" />
     <button type="button" class="btn-action btn-delete" onclick="removeTrackRowForm(this)" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.85rem;">✕</button>
@@ -2588,17 +2725,21 @@ async function saveAdminProduct() {
     genero_slug: document.getElementById("prodGenre").value,
     precio: parseFloat(document.getElementById("prodPrice").value),
     stock: parseInt(document.getElementById("prodStock").value),
-    anio: document.getElementById("prodYear").value ? parseInt(document.getElementById("prodYear").value) : null,
+    anio: document.getElementById("prodYear").value
+      ? parseInt(document.getElementById("prodYear").value)
+      : null,
     formato: document.getElementById("prodFormat").value.trim() || "LP",
     rpm: document.getElementById("prodRPM").value.trim() || "33 RPM",
-    material: document.getElementById("prodMaterial").value.trim() || "Vinilo negro 180g",
+    material:
+      document.getElementById("prodMaterial").value.trim() ||
+      "Vinilo negro 180g",
     estado: document.getElementById("prodEstado").value.trim() || "Nuevo",
     badge: document.getElementById("prodBadge").value.trim() || null,
     imagen_url: document.getElementById("prodImage").value.trim() || null,
     incluye: document.getElementById("prodIncludes").value.trim() || null,
     descripcion: document.getElementById("prodDesc").value.trim() || null,
     es_novedad: document.getElementById("prodIsNew").checked,
-    activo: document.getElementById("prodActive").checked
+    activo: document.getElementById("prodActive").checked,
   };
 
   const btn = document.getElementById("btnSaveProduct");
@@ -2609,7 +2750,12 @@ async function saveAdminProduct() {
   try {
     let pid = productId;
     if (isEdit) {
-      await sb.authPatch("productos", `?id=eq.${productId}`, productData, authToken);
+      await sb.authPatch(
+        "productos",
+        `?id=eq.${productId}`,
+        productData,
+        authToken
+      );
       showToast("✅", "Producto actualizado con éxito");
     } else {
       const res = await sb.authPost("productos", productData, authToken);
@@ -2620,21 +2766,23 @@ async function saveAdminProduct() {
       showToast("✅", "Producto creado con éxito");
     }
 
-    const trackRows = document.querySelectorAll("#formTracksContainer .track-row-form");
+    const trackRows = document.querySelectorAll(
+      "#formTracksContainer .track-row-form"
+    );
     const tracksData = [];
     trackRows.forEach((row) => {
       const lado = row.querySelector(".track-lado").value;
       const numero = parseInt(row.querySelector(".track-numero").value);
       const nombre = row.querySelector(".track-nombre").value.trim();
       const duracion = row.querySelector(".track-duracion").value.trim();
-      
+
       if (nombre) {
         tracksData.push({
           producto_id: pid,
           lado,
           numero,
           nombre,
-          duracion: duracion || null
+          duracion: duracion || null,
         });
       }
     });
@@ -2739,7 +2887,11 @@ async function loginWithEmail() {
 
     let profileData = {};
     try {
-      const perfiles = await sb.authGet("perfiles", `?id=eq.${data.user.id}`, authToken);
+      const perfiles = await sb.authGet(
+        "perfiles",
+        `?id=eq.${data.user.id}`,
+        authToken
+      );
       if (perfiles && perfiles.length) {
         profileData = perfiles[0];
       }
@@ -2817,7 +2969,11 @@ async function registerUser() {
 
     // LOGIN AUTOMÁTICO INSTANTÁNEO
     let sessionData = data;
-    if (!sessionData?.session && !sessionData?.access_token && sessionData?.user) {
+    if (
+      !sessionData?.session &&
+      !sessionData?.access_token &&
+      sessionData?.user
+    ) {
       // El trigger en BD ya confirmó la cuenta, así que iniciamos sesión al instante de forma transparente
       try {
         sessionData = await sb.signIn(email, pass);
@@ -2830,7 +2986,8 @@ async function registerUser() {
       // Limpiar pedidos de cualquier sesión anterior ANTES de establecer la nueva.
       clearUserOrders();
 
-      authToken = sessionData?.session?.access_token || sessionData?.access_token;
+      authToken =
+        sessionData?.session?.access_token || sessionData?.access_token;
 
       localStorage.setItem("ouat_token", authToken);
 
@@ -2847,7 +3004,10 @@ async function registerUser() {
       showToast("🎉", `¡Cuenta creada con éxito! Bienvenida, ${name}`);
     } else {
       closeAuth();
-      showToast("📧", "Cuenta creada. Por favor inicia sesión con tu contraseña.");
+      showToast(
+        "📧",
+        "Cuenta creada. Por favor inicia sesión con tu contraseña."
+      );
     }
   } catch (e) {
     console.error("REGISTER ERROR:", e);
@@ -2961,15 +3121,25 @@ async function checkAuthSession() {
         const u = await sb.getUser(token);
         let profileData = {};
         try {
-          const perfiles = await sb.authGet("perfiles", `?id=eq.${u.id}`, token);
+          const perfiles = await sb.authGet(
+            "perfiles",
+            `?id=eq.${u.id}`,
+            token
+          );
           if (perfiles && perfiles.length) {
             profileData = perfiles[0];
           }
         } catch (profileErr) {
-          console.warn("No se pudo obtener el perfil de Supabase en hash token:", profileErr);
+          console.warn(
+            "No se pudo obtener el perfil de Supabase en hash token:",
+            profileErr
+          );
         }
         setUser({
-          name: profileData.nombre || u.user_metadata?.name || u.email.split("@")[0],
+          name:
+            profileData.nombre ||
+            u.user_metadata?.name ||
+            u.email.split("@")[0],
           apellido: profileData.apellido || "",
           telefono: profileData.telefono || "",
           email: u.email,
@@ -2990,15 +3160,26 @@ async function checkAuthSession() {
 
       let profileData = {};
       try {
-        const perfiles = await sb.authGet("perfiles", `?id=eq.${u.id}`, authToken);
+        const perfiles = await sb.authGet(
+          "perfiles",
+          `?id=eq.${u.id}`,
+          authToken
+        );
         if (perfiles && perfiles.length) {
           profileData = perfiles[0];
         }
       } catch (profileErr) {
-        console.warn("No se pudo obtener el perfil de Supabase en session check:", profileErr);
+        console.warn(
+          "No se pudo obtener el perfil de Supabase en session check:",
+          profileErr
+        );
       }
       setUser({
-        name: profileData.nombre || saved?.name || u.user_metadata?.name || u.email.split("@")[0],
+        name:
+          profileData.nombre ||
+          saved?.name ||
+          u.user_metadata?.name ||
+          u.email.split("@")[0],
         apellido: profileData.apellido || saved?.apellido || "",
         telefono: profileData.telefono || saved?.telefono || "",
         email: u.email,
@@ -3019,11 +3200,7 @@ async function checkAuthSession() {
    POLÍTICAS — Tabs
    ===================================================== */
 function switchPolicyTab(tab) {
-  const tabs = [
-    "devoluciones",
-    "privacidad",
-    "terminos",
-  ];
+  const tabs = ["devoluciones", "privacidad", "terminos"];
   document
     .querySelectorAll(".policy-tabs-bar .policy-tab")
     .forEach((t, i) => t.classList.toggle("active", tabs[i] === tab));
@@ -3048,9 +3225,13 @@ async function filterGenre(genre) {
     showPage("tienda");
     return;
   }
-  const checkbox = document.querySelector(`.filter-options input[value="${genre}"]`);
+  const checkbox = document.querySelector(
+    `.filter-options input[value="${genre}"]`
+  );
   if (checkbox) {
-    document.querySelectorAll(".filter-options input[type=checkbox]").forEach((cb) => cb.checked = false);
+    document
+      .querySelectorAll(".filter-options input[type=checkbox]")
+      .forEach((cb) => (cb.checked = false));
     checkbox.checked = true;
   }
   const grid = document.getElementById("shopGrid");
@@ -3207,7 +3388,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
   if (document.getElementById("page-politicas")) {
-    const targetTab = localStorage.getItem("ouat_target_policy_tab") || "devoluciones";
+    const targetTab =
+      localStorage.getItem("ouat_target_policy_tab") || "devoluciones";
     switchPolicyTab(targetTab);
     localStorage.removeItem("ouat_target_policy_tab");
   }
@@ -3224,8 +3406,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.getElementById("page-envios")) {
     const txt = document.getElementById("shippingText");
     const cst = document.getElementById("shippingCostText");
-    if(txt) txt.textContent = storeConfig.envio_mensaje;
-    if(cst) cst.textContent = `El envío estándar a cualquier parte de México tiene un costo de $${storeConfig.envio_costo} MXN. ¡Y es gratis en compras mayores a $${storeConfig.envio_gratis_min} MXN!`;
+    if (txt) txt.textContent = storeConfig.envio_mensaje;
+    if (cst)
+      cst.textContent = `El envío estándar a cualquier parte de México tiene un costo de $${storeConfig.envio_costo} MXN. ¡Y es gratis en compras mayores a $${storeConfig.envio_gratis_min} MXN!`;
   }
 
   setTimeout(
