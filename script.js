@@ -1158,7 +1158,11 @@ function userBoughtCurrentProduct() {
       o.status !== "cancelled" &&
       o.status !== "pendiente_pago" &&
       (o.items || []).some(
-        (i) => i.id === currentProduct.id || i.id === currentProduct.supabaseId
+        (i) =>
+          i.id === currentProduct.id ||
+          i.id === currentProduct.supabaseId ||
+          i.producto_id === currentProduct.supabaseId ||
+          i.producto_id === currentProduct.id
       )
   );
 }
